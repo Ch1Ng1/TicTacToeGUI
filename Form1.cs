@@ -1,93 +1,98 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TicTacToeGUI
+namespace TicTacToeGUI;
+
+public class Form1 : Form
 {
-    public class Form1 : Form
+    private Button[] buttons = new Button[9];
+    private char currentPlayer = 'X';
+
+    public Form1()
     {
-        private Button[] buttons = new Button[9];
-        private char currentPlayer = 'X';
+        this.Text = "Морски шах";
+        this.ClientSize = new Size(300, 320);
+        CreateBoard();
+    }
 
-        public Form1()
+    private void CreateBoard()
+    {
+        for (int i = 0; i < 9; i++)
         {
-            this.Text = "Морски шах";
-            this.ClientSize = new Size(300, 320);
-            CreateBoard();
+            buttons[i] = new Button();
+            buttons[i].Size = new Size(80, 80);
+            buttons[i].Location = new Point((i % 3) * 90 + 10, (i / 3) * 90 + 10);
+            buttons[i].Font = new Font("Arial", 24);
+            buttons[i].Click += ButtonClick;
+            this.Controls.Add(buttons[i]);
         }
+    }
 
-        private void CreateBoard()
+    private void ButtonClick(object sender, EventArgs e)
+    {
+        Button btn = sender as Button;
+        if (btn != null && btn.Text == "")
         {
-            for (int i = 0; i < 9; i++)
+            btn.Text = currentPlayer.ToString();
+            btn.Enabled = false;
+
+            if (CheckWin())
             {
-                buttons[i] = new Button();
-                buttons[i].Size = new Size(80, 80);
-                buttons[i].Location = new Point((i % 3) * 90 + 10, (i / 3) * 90 + 10);
-                buttons[i].Font = new Font("Arial", 24);
-                buttons[i].Click += ButtonClick;
-                this.Controls.Add(buttons[i]);
+                MessageBox.Show($"Играч {currentPlayer} печели!");
+                ResetBoard();
+            }
+            else if (IsDraw())
+            {
+                MessageBox.Show("Равенство!");
+                ResetBoard();
+            }
+            else
+            {
+                currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
             }
         }
+    }
 
-        private void ButtonClick(object sender, EventArgs e)
+    private bool CheckWin()
+    {
+        int[][] winCombos = new int[][]
         {
-            Button btn = sender as Button;
-            if (btn != null && btn.Text == "")
-            {
-                btn.Text = currentPlayer.ToString();
-                btn.Enabled = false;
+            new int[] {0,1,2}, new int[] {3,4,5}, new int[] {6,7,8},
+            new int[] {0,3,6}, new int[] {1,4,7}, new int[] {2,5,8},
+            new int[] {0,4,8}, new int[] {2,4,6}
+        };
 
-                if (CheckWin())
-                {
-                    MessageBox.Show($"Играч {currentPlayer} печели!");
-                    ResetBoard();
-                }
-                else if (IsDraw())
-                {
-                    MessageBox.Show("Равенство!");
-                    ResetBoard();
-                }
-                else
-                {
-                    currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
-                }
-            }
-        }
-
-        private bool CheckWin()
+        foreach (var combo in winCombos)
         {
-            int[][] winCombos = new int[][]
-            {
-                new int[] {0,1,2}, new int[] {3,4,5}, new int[] {6,7,8},
-                new int[] {0,3,6}, new int[] {1,4,7}, new int[] {2,5,8},
-                new int[] {0,4,8}, new int[] {2,4,6}
-            };
-
-            foreach (var combo in winCombos)
-            {
-                if (buttons[combo[0]].Text == currentPlayer.ToString() &&
-                    buttons[combo[1]].Text == currentPlayer.ToString() &&
-                    buttons[combo[2]].Text == currentPlayer.ToString())
-                    return true;
-            }
-            return false;
+            if (buttons[combo[0]].Text == currentPlayer.ToString() &&
+                buttons[combo[1]].Text == currentPlayer.ToString() &&
+                buttons[combo[2]].Text == currentPlayer.ToString())
+                return true;
         }
+        return false;
+    }
 
-        private bool IsDraw()
+    private bool IsDraw()
+    {
+        foreach (var btn in buttons)
+            if (btn.Text == "") return false;
+        return true;
+    }
+
+    private void ResetBoard()
+    {
+        foreach (var btn in buttons)
         {
-            foreach (var btn in buttons)
-                if (btn.Text == "") return false;
-            return true;
+            btn.Text = "";
+            btn.Enabled = true;
         }
-
-        private void ResetBoard()
-        {
-            foreach (var btn in buttons)
-            {
-                btn.Text = "";
-                btn.Enabled = true;
-            }
-            currentPlayer = 'X';
-        }
+        currentPlayer = 'X';
     }
 }
