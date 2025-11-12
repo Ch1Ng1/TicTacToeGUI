@@ -23,8 +23,8 @@ public class Form1 : Form
         this.Text = "🎮 Морски шах 🎮";
         this.ClientSize = new Size(640, 560);
         this.BackColor = Color.FromArgb(64, 64, 64); // Средно тъмно сив фон
-        this.FormBorderStyle = FormBorderStyle.FixedSingle;
-        this.MaximizeBox = false;
+        this.FormBorderStyle = FormBorderStyle.Sizable;
+        this.MaximizeBox = true;
     SetBoardBackground();
     CreateBoard();
     CreateChangeBgButton();
@@ -114,6 +114,22 @@ public class Form1 : Form
                     boardBackground = img;
                     if (boardPanel != null) boardPanel.BackgroundImage = boardBackground;
                     this.BackgroundImage = boardBackground;
+                    
+                    // Resize form to match image dimensions (with padding for the Change BG button and margins)
+                    if (img != null && img.Width > 0 && img.Height > 0)
+                    {
+                        // Add space for button (40 px) and some padding (10 px each side)
+                        int newWidth = img.Width + 20;  // left/right padding
+                        int newHeight = img.Height + 70;  // top padding (button) + bottom
+                        this.ClientSize = new Size(newWidth, newHeight);
+                        
+                        // Also resize the panel to fill the new form (minus button area)
+                        if (boardPanel != null)
+                        {
+                            boardPanel.Location = new Point(10, 50);
+                            boardPanel.Size = new Size(newWidth - 20, newHeight - 60);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
