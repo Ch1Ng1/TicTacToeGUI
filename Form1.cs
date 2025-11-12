@@ -104,23 +104,38 @@ public class Form1 : Form
             {
                 try
                 {
+                    // Load image into memory immediately to avoid file locking issues
+                    Image newImage = null;
+                    using (var tempImg = Image.FromFile(ofd.FileName))
+                    {
+                        // Create a copy in memory
+                        newImage = new Bitmap(tempImg);
+                    }
+                    
+                    // Save to assets folder for persistence
                     string assetsDir = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets");
                     if (!System.IO.Directory.Exists(assetsDir)) System.IO.Directory.CreateDirectory(assetsDir);
                     string dest = System.IO.Path.Combine(assetsDir, "beach.jpg");
-                    // copy selected file to assets (overwrite)
-                    System.IO.File.Copy(ofd.FileName, dest, true);
-                    // load and apply
-                    var img = Image.FromFile(dest);
-                    boardBackground = img;
+                    // Save the new image
+                    newImage.Save(dest, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    
+                    // Dispose old image if exists
+                    if (boardBackground != null) 
+                    {
+                        try { boardBackground.Dispose(); } catch { }
+                    }
+                    
+                    // Apply new image
+                    boardBackground = newImage;
                     if (boardPanel != null) boardPanel.BackgroundImage = boardBackground;
                     this.BackgroundImage = boardBackground;
                     
                     // Resize form to match image dimensions (with padding for the Change BG button and margins)
-                    if (img != null && img.Width > 0 && img.Height > 0)
+                    if (newImage != null && newImage.Width > 0 && newImage.Height > 0)
                     {
                         // Add space for button (40 px) and some padding (10 px each side)
-                        int newWidth = img.Width + 20;  // left/right padding
-                        int newHeight = img.Height + 70;  // top padding (button) + bottom
+                        int newWidth = newImage.Width + 20;  // left/right padding
+                        int newHeight = newImage.Height + 70;  // top padding (button) + bottom
                         this.ClientSize = new Size(newWidth, newHeight);
                         
                         // Also resize the panel to fill the new form (minus button area)
